@@ -6,8 +6,8 @@ import * as yup from "yup";
 import { supabase } from "../../pages/api/supabaseClient"; // Update the path based on the location
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { v4 as uuidv4 } from "uuid"; // Import uuid function
 
-// Validation schema using yup
 const schema = yup
   .object({
     name: yup.string().required().label("Name"),
@@ -37,11 +37,6 @@ const RegisterForm = () => {
       const { user, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
-        options: {
-          data: {
-            username: data.name, // Store the Display Name as user metadata
-          },
-        },
       });
 
       if (error) {
@@ -54,36 +49,26 @@ const RegisterForm = () => {
         return;
       }
 
-      // Inform user to check their email for verification
-      toast.info(
-        "Registration successful! Please check your email to verify your account."
-      );
+      // Generate a random ID for the profile
+      const profileId = uuidv4();
 
-      // Check if user ID is available
-      if (user?.id) {
-        // Store additional user information in the 'profiles' table
-        const { error: profileError } = await supabase.from("profiles").upsert([
-          {
-            id: user.id, // Use the user ID from Supabase auth
-            username: data.name,
-            email: data.email,
-          },
-        ]);
+      // Store additional user information in the 'profiles' table
+      const { error: profileError } = await supabase.from("profiles").upsert([
+        {
+          id: profileId, // Use the generated UUID
+          username: data.name,
+          email: data.email,
+          password: data.password, // Consider hashing the password before storing
+        },
+      ]);
 
-        if (profileError) {
-          console.error("Error inserting/updating profile:", profileError);
-          toast.error(`Profile Error: ${profileError.message}`);
-        }
-      } else {
-        console.warn(
-          "User ID is not available immediately after signup. Skipping profile update."
-        );
+      if (profileError) {
+        throw profileError;
       }
 
-      // Clear form fields
+      toast.success("Registration successful! You may now log in.");
       reset();
     } catch (error) {
-      console.error("Error during registration:", error);
       toast.error(`Error: ${error.message}`);
     } finally {
       setIsSubmitting(false);
@@ -95,13 +80,13 @@ const RegisterForm = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <ToastContainer />
         <label htmlFor="name">
-          Display Name <span>**</span>
+          User Name <span>**</span>
         </label>
         <input
           {...register("name")}
           id="name"
           type="text"
-          placeholder="Your Display Name"
+          placeholder="Your Name"
         />
         <p className="form_error">{errors.name?.message}</p>
 

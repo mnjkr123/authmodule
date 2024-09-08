@@ -2,19 +2,18 @@ import HeaderTwo from "@/src/layout/headers/header-2";
 import Breadcrumb from "../../components/common/breadcrumb/breadcrumb";
 import Footer from "@/src/layout/footers/footer";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router"; // Import useRouter
-import { supabase } from "../../api/supabaseClient";
+import { useRouter } from "next/router";
+import { supabase } from "../api/supabaseClient";
 import styles from "./Profile.module.css";
 
 const Profile = () => {
-  const [user, setUser] = useState({ name: "", email: "" });
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter(); // Use router for navigation
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Get current session
         const { data: sessionData, error: sessionError } =
           await supabase.auth.getSession();
 
@@ -27,8 +26,7 @@ const Profile = () => {
 
         if (!session) {
           console.log("No active session. Redirecting to login page.");
-          router.push("/login"); // Redirect to login page if no session
-          setLoading(false);
+          router.push("/login"); // Redirect to login if no session
           return;
         }
 
@@ -42,7 +40,7 @@ const Profile = () => {
           .single();
 
         if (error) {
-          console.error("Error fetching user data from Profiles table:", error);
+          console.error("Error fetching user data:", error);
         } else {
           setUser({
             name: data.username || "",
@@ -70,24 +68,22 @@ const Profile = () => {
               <div className="col-lg-8 offset-lg-2">
                 {loading ? (
                   <p>Loading...</p>
-                ) : (
+                ) : user ? (
                   <div className={styles.profileBox}>
                     <h2 className="mb-30">Profile Information</h2>
-                    {user.name && user.email ? (
-                      <div className={styles.profileDetails}>
-                        <div className={styles.profileItem}>
-                          <strong>Name:</strong>
-                          <span>{user.name}</span>
-                        </div>
-                        <div className={styles.profileItem}>
-                          <strong>Email:</strong>
-                          <span>{user.email}</span>
-                        </div>
+                    <div className={styles.profileDetails}>
+                      <div className={styles.profileItem}>
+                        <strong>Name:</strong>
+                        <span>{user.name}</span>
                       </div>
-                    ) : (
-                      <p>No profile information available.</p>
-                    )}
+                      <div className={styles.profileItem}>
+                        <strong>Email:</strong>
+                        <span>{user.email}</span>
+                      </div>
+                    </div>
                   </div>
+                ) : (
+                  <p>No profile information available. Please log in.</p>
                 )}
               </div>
             </div>

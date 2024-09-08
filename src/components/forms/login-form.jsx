@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { supabase } from "../../api/supabaseClient";
+import { supabase } from "../../pages/api/supabaseClient";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/router";
@@ -44,15 +44,15 @@ const LoginForm = () => {
         password: data.password,
       });
       login({ email: data.email }); // Set user in auth context
-      //   console.log("Username from AuthContext:", user?.email);
-      //   console.log("User object:", user);
+
       if (error) {
         // Show error if sign-in fails
         toast.error(`Error: ${error.message}`);
       } else {
         // Successful login: notify user and redirect
         toast.success("Login successful!");
-        router.push("/"); // Redirect to home or dashboard after login
+        // Redirect to AuthCallback to handle data syncing
+        router.push("/account/auth-callback");
       }
 
       reset(); // Clear form after submission
