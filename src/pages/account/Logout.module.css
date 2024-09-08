@@ -1,0 +1,18 @@
+.logoutMessage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 24px;
+  transition: opacity 2s ease-in-out; /* Smooth fade-out effect */
+  opacity: 1; /* Start fully visible */
+}
+
+.logoutMessage h1 {
+  font-size: 1.5rem; /* Smaller font size */
+  color: #333; /* Color for the text */
+}
+
+.fadeOut {
+  opacity: 0; /* End with no opacity */
+}
